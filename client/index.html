@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Your Donation Barometer</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <style>
+        @font-face {
+            font-family: 'Open Sans';
+            font-style: normal;
+            font-weight: 600;
+            src: local('Open Sans Semibold'), local('OpenSans-Semibold'), url(https://themes.googleusercontent.com/static/fonts/opensans/v8/MTP_ySUJH_bn48VBG8sNSqRDOzjiPcYnFooOUGCOsRk.woff) format('woff');
+        }
+
+        #barometer-container.barometer-container .barometer-wrapper {
+            position: relative;
+            margin: 0 auto;
+            width: 200px;
+            height: 290px;
+            font-family: 'Open Sans', sans-serif;
+            font-weight: normal;
+            line-height: 1.2;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            color: #ffffff;
+        }
+
+        #barometer-container.barometer-container .barometer-meter {
+            position: relative;
+            height: 216px;
+        }
+
+        #barometer-container.barometer-container .barometer-fuel-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 216px;
+            width: 200px;
+            background: url('img/fuel_bg.png') top center no-repeat;
+            z-index: 1;
+        }
+
+        #barometer-container.barometer-container .barometer-fuel {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 216px;
+            width: 200px;
+            background: url('img/fuel.png') top center no-repeat;
+            z-index: 2;
+        }
+
+        #barometer-container.barometer-container .barometer-cover {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 216px;
+            width: 200px;
+            background: #ffffff;
+            z-index: 3;
+            -webkit-transition: all 0.5s ease-out;
+            -moz-transition: all 0.5s ease-out;
+            -o-transition: all 0.5s ease-out;
+            transition: all 0.5s ease-out;
+        }
+
+        #barometer-container.barometer-container .barometer-glass {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 216px;
+            width: 200px;
+            background: url('img/glass.png') top center no-repeat;
+            z-index: 4;
+        }
+
+        #barometer-container.barometer-container .barometer-mask {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 216px;
+            width: 200px;
+            background: url('img/mask.png') top center no-repeat;
+            z-index: 5;
+        }
+
+        #barometer-container.barometer-container .barometer-target {
+            position: absolute;
+            top: 28px;
+            left: 0;
+            width: 200px;
+            background: url('img/target_line.png') 0 12px no-repeat;
+            z-index: 6;
+        }
+
+        #barometer-container.barometer-container .barometer-target-title {
+            display: block;
+            font-size: 12px;
+            line-height: 16px;
+        }
+
+        #barometer-container.barometer-container .barometer-target-currency {
+            display: block;
+            font-size: 10px;
+            line-height: 12px;
+        }
+
+        #barometer-container.barometer-container .barometer-target-amount {
+            display: block;
+            font-size: 25px;
+            line-height: 25px;
+        }
+
+        #barometer-container.barometer-container .barometer-current {
+            text-align: right;
+            position: absolute;
+            top: 0;
+            right: 0;
+            height: 216px;
+            width: 200px;
+            -webkit-transition: all 0.5s ease-out;
+            -moz-transition: all 0.5s ease-out;
+            -o-transition: all 0.5s ease-out;
+            transition: all 0.5s ease-out;
+            z-index: 8;
+        }
+
+        #barometer-container.barometer-container .barometer-current-content {
+            position: absolute;
+            width: 100%;
+            height: 70px;
+            background: url('img/current_line.png') 100% 16px no-repeat;
+            bottom: -54px;
+            right: 0;
+        }
+
+        #barometer-container.barometer-container .barometer-current-title {
+            display: block;
+            font-size: 12px;
+            line-height: 16px;
+        }
+
+        #barometer-container.barometer-container .barometer-current-currency {
+            display: block;
+            font-size: 10px;
+            line-height: 12px;
+        }
+
+        #barometer-container.barometer-container .barometer-current-amount {
+            display: block;
+            font-size: 25px;
+            line-height: 25px;
+        }
+    </style>
+</head>
+<body>
+
+<div id="barometer-container" class="barometer-container">
+    <div class="barometer-wrapper">
+        <div class="barometer-meter">
+            <div class="barometer-fuel-bg"></div>
+            <div class="barometer-fuel"></div>
+            <div class="barometer-cover"></div>
+            <div class="barometer-glass"></div>
+            <div class="barometer-mask"></div>
+
+            <div class="barometer-target">
+                <span class="barometer-target-title">Target</span>
+                <span class="barometer-target-currency"></span>
+                <span class="barometer-target-amount"></span>
+            </div>
+
+            <div class="barometer-current">
+                <div class="barometer-current-content">
+                    <span class="barometer-current-title">Current</span>
+                    <span class="barometer-current-currency"></span>
+                    <span class="barometer-current-amount"
+                          data-current-amount="0"
+                          data-current-target-amount="0">
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="application/javascript">
+
+    /**
+     * This will animate the counter from bottom to top.
+     *
+     * @param currentAmountElement The jQuery element to animate.
+     * @param endInPercentage The percentage value until where the counter should be animated. A value between 0 and 100.
+     * @param targetAmountInCents The target amount to where one should animate.
+     */
+    function animateCounter(currentAmountElement, endInPercentage, targetAmountInCents) {
+        let currentVal = currentAmountElement.data("current-amount"),
+            currentTargetVal = currentAmountElement.data("current-target-amount"),
+            interval,
+            steps = 10, // in how many steps the counter should be animated
+            duration = 0.5, // the duration of each step's animation
+            counterProgressStepSize = (endInPercentage - currentVal) / steps, // how far we move in any step
+            counterTargetStepSize = (targetAmountInCents / steps),
+            counterProgressVal,
+            intervalMs = (1000 * duration) / steps;
+
+        function step(operator) {
+            currentVal = currentVal + counterProgressStepSize;
+            counterProgressVal = Number(currentVal).toFixed(0);
+
+            currentTargetVal = currentTargetVal + counterTargetStepSize;
+
+            if (!operator(currentVal, endInPercentage)) {
+                clearInterval(interval);
+                counterProgressVal = endInPercentage;
+            }
+
+            currentAmountElement.text(Number(currentTargetVal / 100).toFixed(2));
+            currentAmountElement.data("current-amount", counterProgressVal);
+            currentAmountElement.data("current-target-amount", currentTargetVal);
+        }
+
+        // set initial value
+        currentAmountElement.text(currentVal);
+
+        // count up or down
+        if (currentVal < endInPercentage) {
+            interval = window.setInterval(function () {
+                step(function (a, b) {
+                    return a < b;
+                });
+            }, intervalMs);
+        } else if (currentVal > endInPercentage) {
+            interval = window.setInterval(function () {
+                step(function (a, b) {
+                    return a > b;
+                });
+            }, intervalMs);
+        }
+    }
+
+    $(document).ready(function () {
+        // This mimics the response you get from your server-side component,
+        // which has previously queried the RaiseNow Search API.
+        const serverResponse = {
+            currency: 'chf',
+            targetAmount: 15000,
+            currentAmount: 12350
+        };
+
+        const barometerStartLevel = 0;
+
+        const cover = $('.barometer-cover'),
+            current = $('.barometer-current'),
+            currentCurrency = $('.barometer-current-currency'),
+            currentAmount = $('.barometer-current-amount'),
+            targetCurrency = $('.barometer-target-currency'),
+            targetAmount = $('.barometer-target-amount');
+
+        // set the current amount and corresponding currency
+        currentCurrency.text(serverResponse.currency.toUpperCase());
+
+        // set the target amount and corresponding currency
+        targetCurrency.text(serverResponse.currency.toUpperCase());
+        targetAmount.text((serverResponse.targetAmount / 100).toFixed(2));
+
+        // Calculate how far we should go in the animation.
+        // E.g. using 80 will scale the current amount to 80% of the total available space
+        const factor = 80;
+
+        const percentValue =
+            ((serverResponse.currentAmount / 100) - barometerStartLevel) /
+            (serverResponse.targetAmount / 100 - barometerStartLevel) * factor;
+
+        // put the cover of the barometer to the percent value to which we want to scale.
+        cover.css('height', 100 - percentValue + '%');
+        current.css('height', 100 - percentValue + '%');
+
+        animateCounter(currentAmount, percentValue, serverResponse.currentAmount);
+    });
+
+</script>
+
+</body>
+</html>

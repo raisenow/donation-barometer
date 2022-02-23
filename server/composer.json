@@ -1,0 +1,9 @@
+{
+    "name": "vendor/donation-barometer",
+    "description": "A donation baromter",
+    "type": "project",
+    "require": {
+        "guzzlehttp/guzzle": "^7.4"
+    },
+    "license": "MIT"
+}
